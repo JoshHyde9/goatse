@@ -26,19 +26,25 @@ func PostRouter() chi.Router {
 	})
 
 	r.Post("/create", func(w http.ResponseWriter, r *http.Request) {
-		var newPost models.Post
-		err := json.NewDecoder(r.Body).Decode(&newPost)
+		var newPostInput models.CreatePost
+		err := json.NewDecoder(r.Body).Decode(&newPostInput)
 
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"code":    http.StatusBadRequest,
 				"message": "You dun fucked",
 			})
 			return
 		}
 
-		posts := append(posts, newPost)
+		newPost := models.Post{
+			Id:        uuid.NewString(),
+			Title:     newPostInput.Title,
+			Author:    newPostInput.Author,
+			CreatedAt: time.Now(),
+		}
+
+		posts = append(posts, newPost)
 
 		json.NewEncoder(w).Encode(posts)
 	})
@@ -47,25 +53,36 @@ func PostRouter() chi.Router {
 		id := chi.URLParam(r, "id")
 
 		if id == "" {
+			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"code":    http.StatusBadRequest,
 				"message": "Missing `id` param",
 			})
 		}
 
+		found := false
 		for _, post := range posts {
 			if post.Id == id {
+				found = true
 				json.NewEncoder(w).Encode(post)
+				break
 			}
 		}
+
+		if !found {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"message": "Missing `id` param",
+			})
+		}
+
 	})
 
 	r.Patch("/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
 
 		if id == "" {
+			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"code":    http.StatusBadRequest,
 				"message": "Missing `id` param",
 			})
 		}
@@ -75,16 +92,17 @@ func PostRouter() chi.Router {
 		err := json.NewDecoder(r.Body).Decode(&updatePost)
 
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"code":    http.StatusBadRequest,
 				"message": "You dun fucked",
 			})
 			return
 		}
 
+		found := false
 		for i := range posts {
 			if posts[i].Id == id {
+				found = true
 
 				if updatePost.Title != nil {
 					posts[i].Title = *updatePost.Title
@@ -96,7 +114,13 @@ func PostRouter() chi.Router {
 				json.NewEncoder(w).Encode(posts[i])
 				break
 			}
+		}
 
+		if !found {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"message": "You dun fucked",
+			})
 		}
 	})
 
