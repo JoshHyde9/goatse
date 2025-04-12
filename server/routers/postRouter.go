@@ -8,11 +8,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 
 	"goatse/models"
 )
 
-func PostRouter() chi.Router {
+func PostRouter(*gorm.DB) chi.Router {
 	r := chi.NewRouter()
 
 	posts := []models.Post{

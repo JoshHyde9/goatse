@@ -5,10 +5,10 @@ import (
 )
 
 type Post struct {
-	Id        string    `json:"id"`
-	Title     string    `json:"title"`
-	Author    string    `json:"author"`
-	CreatedAt time.Time `json:"created_at"`
+	Id        string    `json:"id" gorm:"primaryKey"`
+	Title     string    `json:"title" gorm:"not null"`
+	Author    string    `json:"author" gorm:"not null"`
+	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
 }
 
 type CreatePost struct {
