@@ -70,7 +70,7 @@ func PostRouter(db *gorm.DB) chi.Router {
 		if result.Error != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]any{
-				"message": "Missing `id` param",
+				"message": "Something ain't right here",
 			})
 			return
 		}
