@@ -1,7 +1,11 @@
 <script lang="ts">
-	import '../app.css';
+  import "../app.css";
+  import { QueryClientProvider } from "@tanstack/svelte-query";
+  import type { PageData } from "./$types";
 
-	let { children } = $props();
+  export let data: PageData;
 </script>
 
-{@render children()}
+<QueryClientProvider client={data.queryClient}>
+  <slot />
+</QueryClientProvider>

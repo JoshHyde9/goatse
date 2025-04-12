@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 
 	"goatse/middleware"
 	"goatse/routers"
@@ -14,9 +15,13 @@ import (
 func main() {
 	r := chi.NewRouter()
 
-	postRouter := routers.PostRouter()
-
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+	}))
 	r.Use(middleware.SetJSONContentType)
+
+	postRouter := routers.PostRouter()
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]interface{}{
