@@ -63,7 +63,7 @@
           .replace(",", "-")}</time
       >
 
-      <p class="block text-xl font-medium md:text-3xl">
+      <p class="block text-xl font-medium break-words md:text-3xl">
         - {$post.data.author}
       </p>
     </header>
