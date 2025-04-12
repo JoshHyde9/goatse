@@ -3,7 +3,6 @@ package routers
 import (
 	"encoding/json"
 	"net/http"
-	"slices"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -13,16 +12,13 @@ import (
 	"goatse/models"
 )
 
-func PostRouter(*gorm.DB) chi.Router {
+func PostRouter(db *gorm.DB) chi.Router {
 	r := chi.NewRouter()
 
-	posts := []models.Post{
-		{Id: uuid.NewString(), Title: "Post 1", Author: "Your Mum", CreatedAt: time.Now()},
-		{Id: uuid.NewString(), Title: "Post 2", Author: "Your Dad", CreatedAt: time.Now()},
-		{Id: uuid.NewString(), Title: "Post 3", Author: "Your Fat Hog", CreatedAt: time.Now()},
-	}
-
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		var posts []models.Post
+
+		db.Order("created_at desc").Find(&posts)
 
 		json.NewEncoder(w).Encode(posts)
 	})
@@ -33,7 +29,7 @@ func PostRouter(*gorm.DB) chi.Router {
 
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "You dun fucked",
 			})
 			return
@@ -46,37 +42,39 @@ func PostRouter(*gorm.DB) chi.Router {
 			CreatedAt: time.Now(),
 		}
 
-		posts = append(posts, newPost)
+		if err := db.Create(newPost).Error; err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]any{
+				"message": "Something ain't right here",
+			})
+			return
+		}
 
-		json.NewEncoder(w).Encode(posts)
+		json.NewEncoder(w).Encode(newPost)
 	})
 
 	r.Get("/{id}", func(w http.ResponseWriter, r *http.Request) {
+		var existingPost models.Post
 		id := chi.URLParam(r, "id")
 
 		if id == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "Missing `id` param",
 			})
+			return
 		}
 
-		found := false
-		for _, post := range posts {
-			if post.Id == id {
-				found = true
-				json.NewEncoder(w).Encode(post)
-				break
-			}
-		}
+		result := db.First(&existingPost, "id = ?", id)
 
-		if !found {
+		if result.Error != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "Missing `id` param",
 			})
+			return
 		}
-
+		json.NewEncoder(w).Encode(existingPost)
 	})
 
 	r.Patch("/{id}", func(w http.ResponseWriter, r *http.Request) {
@@ -84,9 +82,10 @@ func PostRouter(*gorm.DB) chi.Router {
 
 		if id == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "Missing `id` param",
 			})
+			return
 		}
 
 		var updatePost models.UpdatePost
@@ -95,35 +94,32 @@ func PostRouter(*gorm.DB) chi.Router {
 
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "You dun fucked",
 			})
 			return
 		}
 
-		found := false
-		for i := range posts {
-			if posts[i].Id == id {
-				found = true
+		updates := map[string]any{}
 
-				if updatePost.Title != nil {
-					posts[i].Title = *updatePost.Title
-				}
-
-				if updatePost.Author != nil {
-					posts[i].Author = *updatePost.Author
-				}
-				json.NewEncoder(w).Encode(posts[i])
-				break
-			}
+		if updatePost.Title != nil {
+			updates["title"] = *updatePost.Title
+		}
+		if updatePost.Author != nil {
+			updates["author"] = *updatePost.Author
 		}
 
-		if !found {
+		result := db.Model(models.Post{}).Where("id = ?", id).Updates(updates)
+
+		if result.Error != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "You dun fucked",
 			})
+			return
 		}
+
+		json.NewEncoder(w).Encode(updatePost)
 	})
 
 	r.Delete("/{id}", func(w http.ResponseWriter, r *http.Request) {
@@ -131,27 +127,25 @@ func PostRouter(*gorm.DB) chi.Router {
 
 		if id == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "You dun fucked",
 			})
 			return
 		}
 
-		index := slices.IndexFunc(posts, func(post models.Post) bool {
-			return post.Id == id
-		})
+		result := db.Delete(&models.Post{}, "id = ?", id)
 
-		if index >= 0 {
-			posts = slices.Delete(posts, index, index+1)
-		} else {
+		if result.Error != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "You dun fucked",
 			})
 			return
 		}
 
-		json.NewEncoder(w).Encode(posts)
+		json.NewEncoder(w).Encode(map[string]any{
+			"success": true,
+		})
 	})
 
 	return r

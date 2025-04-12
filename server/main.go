@@ -31,7 +31,7 @@ func main() {
 	postRouter := routers.PostRouter(db)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		json.NewEncoder(w).Encode(map[string]any{
 			"code":    http.StatusOK,
 			"message": "Hello, World!",
 		})
