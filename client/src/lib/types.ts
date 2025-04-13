@@ -6,3 +6,5 @@ export type Post = {
 };
 
 export type CreatePost = Pick<Post, "title" | "author">;
+
+export type UpdatePost = CreatePost & Pick<Post, "id">;

@@ -4,6 +4,7 @@
   import { createMutation, createQuery, useQueryClient } from "@tanstack/svelte-query";
   import { api } from "$lib";
   import { goto } from "$app/navigation";
+  import UpdatePost from "./UpdatePost.svelte";
 
   export let postId: string;
 
@@ -72,9 +73,11 @@
     >
       <div>Post content will go here</div>
       <button
-        class="my-4 w-full cursor-pointer rounded-md bg-indigo-500 py-2 text-base text-white transition hover:bg-indigo-400"
+        class="w-full cursor-pointer rounded-md bg-gradient-to-r from-purple-600 to-blue-500 py-2 text-base text-white transition duration-300 hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 disabled:cursor-not-allowed disabled:bg-gradient-to-r disabled:from-purple-300 disabled:to-blue-300 disabled:opacity-70 disabled:hover:from-purple-300 disabled:hover:to-blue-300"
         on:click={handleDeletePost}>Delete</button
       >
     </div>
+
+    <UpdatePost post={$post.data} />
   {/if}
 </article>

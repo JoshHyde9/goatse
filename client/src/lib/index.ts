@@ -1,4 +1,4 @@
-import type { CreatePost, Post } from "./types";
+import type { CreatePost, Post, UpdatePost } from "./types";
 
 export const api = (customFetch = fetch) => ({
   getAllPosts: async () => {
@@ -29,5 +29,15 @@ export const api = (customFetch = fetch) => ({
     });
     const newPost = (await response.json()) as Promise<Post>;
     return newPost;
+  },
+  updatePost: async (data: UpdatePost) => {
+    const response = await customFetch(`http://localhost:5000/posts/${data.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+    return (await response.json()) as Promise<Post>;
   }
 });
