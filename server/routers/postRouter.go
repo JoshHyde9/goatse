@@ -39,6 +39,7 @@ func PostRouter(db *gorm.DB) chi.Router {
 			Id:        uuid.NewString(),
 			Title:     newPostInput.Title,
 			Author:    newPostInput.Author,
+			Content:   newPostInput.Content,
 			CreatedAt: time.Now(),
 		}
 
@@ -105,8 +106,13 @@ func PostRouter(db *gorm.DB) chi.Router {
 		if updatePost.Title != nil {
 			updates["title"] = *updatePost.Title
 		}
+
 		if updatePost.Author != nil {
 			updates["author"] = *updatePost.Author
+		}
+
+		if updatePost.Content != nil {
+			updates["content"] = *updatePost.Content
 		}
 
 		result := db.Model(models.Post{}).Where("id = ?", id).Updates(updates)

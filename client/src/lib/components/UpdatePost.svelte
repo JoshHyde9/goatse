@@ -4,6 +4,7 @@
   import { createMutation, useQueryClient } from "@tanstack/svelte-query";
   import { api } from "$lib";
   import Input from "./Input.svelte";
+  import TipTap from "./TipTap.svelte";
 
   let { post }: { post: UpdatePost } = $props();
 
@@ -11,6 +12,7 @@
 
   let postTitle = $state(post.title);
   let postAuthor = $state(post.author);
+  let postContent = $state(post.content);
   let editPost = $state(false);
 
   const updatePost = createMutation<Post, Error, UpdatePost>({
@@ -34,6 +36,7 @@
     const newPost: UpdatePost = {
       id: post.id,
       title: postTitle,
+      content: postContent,
       author: postAuthor
     };
 
@@ -45,9 +48,16 @@
   {#if editPost}
     <div class="space-y-1">
       <form class="mx-auto flex flex-col space-y-3" onsubmit={handleUpdatePost}>
+        <label for="Title">Title: </label>
         <Input isPending={$updatePost.isPending} placeholder="Title..." bind:value={postTitle} />
 
+        <label for="Author">Author: </label>
         <Input isPending={$updatePost.isPending} placeholder="Author..." bind:value={postAuthor} />
+
+        <div>
+          <label for="content">Content: </label>
+          <TipTap content={postContent} editable={true} bind:html={postContent} />
+        </div>
 
         <button
           type="submit"
@@ -55,7 +65,9 @@
           disabled={$updatePost.isPending ||
             !postTitle.trim() ||
             !postAuthor.trim() ||
-            (postTitle === post.title && postAuthor === post.author)}
+            (postTitle === post.title &&
+              postAuthor === post.author &&
+              postContent === post.content)}
         >
           {$updatePost.isPending ? "Updating..." : "Update Post"}
         </button>

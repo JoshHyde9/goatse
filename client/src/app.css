@@ -1,2 +1,48 @@
 @import "tailwindcss";
-@plugin '@tailwindcss/typography';
+@plugin "@tailwindcss/typography";
+
+button {
+  cursor: pointer;
+}
+
+@layer components {
+  .tiptap-editor {
+    @apply leading-relaxed text-gray-800;
+  }
+
+  .tiptap-editor p {
+    @apply my-3;
+  }
+
+  .tiptap-editor h1 {
+    @apply my-4 text-3xl font-bold text-gray-900;
+  }
+
+  .tiptap-editor h2 {
+    @apply my-3 text-2xl font-bold text-gray-900;
+  }
+
+  .tiptap-editor ul {
+    @apply my-4 list-disc pl-6;
+  }
+
+  .tiptap-editor ol {
+    @apply my-4 list-decimal pl-6;
+  }
+
+  .tiptap-editor li {
+    @apply my-1;
+  }
+
+  .tiptap-editor a {
+    @apply text-blue-600 underline hover:text-blue-800;
+  }
+
+  .tiptap-editor blockquote {
+    @apply my-4 border-l-4 border-gray-300 pl-4 text-gray-700 italic;
+  }
+
+  .tiptap-editor code {
+    @apply rounded bg-gray-100 px-1 py-0.5 text-sm text-red-500;
+  }
+}

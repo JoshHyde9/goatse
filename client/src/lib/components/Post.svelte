@@ -5,6 +5,7 @@
   import { api } from "$lib";
   import { goto } from "$app/navigation";
   import UpdatePost from "./UpdatePost.svelte";
+  import TipTap from "./TipTap.svelte";
 
   export let postId: string;
 
@@ -64,14 +65,14 @@
           .replace(",", "-")}</time
       >
 
-      <p class="block text-xl font-medium break-words md:text-3xl">
+      <p class="text-xl font-medium break-words italic">
         - {$post.data.author}
       </p>
     </header>
     <div
       class="prose-img:breakout prose-base prose-zinc lg:prose-xl prose-img:mb-24 prose-img:rounded-md prose-img:shadow-lg max-w-none"
     >
-      <div>Post content will go here</div>
+      <TipTap content={$post.data.content} editable={false} html={$post.data.content} />
       <button
         class="w-full cursor-pointer rounded-md bg-gradient-to-r from-purple-600 to-blue-500 py-2 text-base text-white transition duration-300 hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 disabled:cursor-not-allowed disabled:bg-gradient-to-r disabled:from-purple-300 disabled:to-blue-300 disabled:opacity-70 disabled:hover:from-purple-300 disabled:hover:to-blue-300"
         on:click={handleDeletePost}>Delete</button

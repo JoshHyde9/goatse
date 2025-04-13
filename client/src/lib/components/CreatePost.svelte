@@ -4,11 +4,13 @@
   import { createMutation, useQueryClient } from "@tanstack/svelte-query";
   import { api } from "$lib";
   import Input from "./Input.svelte";
+  import TipTap from "./TipTap.svelte";
 
   const client = useQueryClient();
 
   let newPostTitle = $state("");
   let newPostAuthor = $state("");
+  let newPostContent = $state("");
 
   const createPost = createMutation<Post, Error, CreatePost>({
     mutationFn: (data) => api().createPost(data),
@@ -17,6 +19,7 @@
 
       newPostTitle = "";
       newPostAuthor = "";
+      newPostContent = "";
     }
   });
 
@@ -26,7 +29,8 @@
 
     const newPost: CreatePost = {
       title: newPostTitle,
-      author: newPostAuthor
+      author: newPostAuthor,
+      content: newPostContent
     };
 
     $createPost.mutate(newPost);
@@ -36,9 +40,16 @@
 <div>
   <div class="flex flex-col space-y-1 px-4">
     <form class="mx-auto flex w-2xl flex-col space-y-3" onsubmit={handleCreatePost}>
+      <label for="Title">Title: </label>
       <Input isPending={$createPost.isPending} placeholder="Title..." bind:value={newPostTitle} />
 
+      <label for="Author">Author: </label>
       <Input isPending={$createPost.isPending} placeholder="Author..." bind:value={newPostAuthor} />
+
+      <div>
+        <label for="content">Content: </label>
+        <TipTap content={newPostContent} editable={true} bind:html={newPostContent} />
+      </div>
 
       <button
         type="submit"
